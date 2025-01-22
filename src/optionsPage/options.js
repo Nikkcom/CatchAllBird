@@ -57,9 +57,11 @@ async function renderGeneralSettings() {
 
     const checkboxFolderCreation = document.getElementById("ckbxfoldercreation");
     const checkboxIdentityCreation = document.getElementById("ckbxidentitycreation");
+    const checkboxFolderCapitalization = document.getElementById("ckbxfoldercapitalization");
 
     checkboxFolderCreation.checked = options.isAutomaticFolderCreationEnabled;
     checkboxIdentityCreation.checked = options.isAutomaticIdentityCreationEnabled;
+    checkboxFolderCapitalization.checked = options.isFolderCapitalizationEnabled;
 
     checkboxFolderCreation.addEventListener("change", async () => {
         // Add the accountId to the list of desired ids
@@ -80,6 +82,16 @@ async function renderGeneralSettings() {
             catchAllBirdOptions: { ...DEFAULT_OPTIONS }
         });
         catchAllBirdOptions.isAutomaticIdentityCreationEnabled = checkboxIdentityCreation.checked;
+        await messenger.storage.local.set({ catchAllBirdOptions });
+    });
+
+    checkboxFolderCapitalization.addEventListener("change", async () => {
+        const {
+            catchAllBirdOptions
+        } = await messenger.storage.local.get({
+            catchAllBirdOptions: { ...DEFAULT_OPTIONS }
+        });
+        catchAllBirdOptions.isFolderCapitalizationEnabled = checkboxFolderCapitalization.checked;
         await messenger.storage.local.set({ catchAllBirdOptions });
     });
 }

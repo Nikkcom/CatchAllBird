@@ -36,17 +36,31 @@ export async function moveMessages(parentFolder, mailMapping) {
    const subfolders = await messenger.folders.getSubFolders(parentFolder.id, false);
    const subfolderMapping = new Map(subfolders.map(subfolder => [subfolder.name, subfolder]));
 
+    // Get settings from storage to see if capitalization of folder names are enabled.
+    const {
+        catchAllBirdOptions: options
+    } = await messenger.storage.local.get({
+        catchAllBirdOptions: { ...DEFAULT_OPTIONS }
+    });
+
    // Some mail server seem to thread . as separator between folders. Naming a folder with a dot will cause the creation of a subfolder and the move to fail.
    // So we will replace for folder names all . with DOT
 
    for (const [prefix, mailIds] of mailMapping) {
        const dotReplacedPrefix = prefix.replaceAll(".", DOT_SUBSTITUTION);
-       // Make sure the prefix subfolder exists
-       if (!subfolderMapping.has(dotReplacedPrefix)) {
-           subfolderMapping.set(dotReplacedPrefix, await messenger.folders.create(parentFolder.id, dotReplacedPrefix));
+
+       // If the capitalization option is enabled, capitalize the first letter of the folder name
+       let capitalizedPrefix = dotReplacedPrefix;
+       if (options.isFolderCapitalizationEnabled) {
+           capitalizedPrefix = dotReplacedPrefix.charAt(0).toUpperCase() + dotReplacedPrefix.slice(1);
        }
 
-       await messenger.messages.move(mailIds, subfolderMapping.get(dotReplacedPrefix).id);
+       // Make sure the prefix subfolder exists
+       if (!subfolderMapping.has(capitalizedPrefix)) {
+           subfolderMapping.set(capitalizedPrefix, await messenger.folders.create(parentFolder.id, capitalizedPrefix));
+       }
+
+       await messenger.messages.move(mailIds, subfolderMapping.get(capitalizedPrefix).id);
    }
 }
 

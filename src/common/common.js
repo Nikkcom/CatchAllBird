@@ -8,4 +8,5 @@
 export const DEFAULT_OPTIONS = Object.freeze({ 
     isAutomaticFolderCreationEnabled: true,
     isAutomaticIdentityCreationEnabled: true,
+    isFolderCapitalizationEnabled: false,
 });
